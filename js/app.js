@@ -1,16 +1,15 @@
 // ==================== CONFIGURATION ====================
 // ==================== CONFIGURATION ====================
 const CONFIG = {
-    domain: 'https://leaderboard-app123.netlify.app/',   // or custom domain
+    domain: 'leaderboard-app123.netlify.app',   // NO https://  NO slash
 
-    // APK hosted on GitHub Releases (Netlify can't host big files)
     apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
 
-    // MUST match Flutter Android package name
     packageName: 'com.leaderboard.leaderboard',
 
     deepLinkTimeout: 2500,
 };
+
 
 
 // ==================== UTILITIES ====================
