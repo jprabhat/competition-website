@@ -4,7 +4,7 @@ const CONFIG = {
     domain: 'your-netlify-domain.netlify.app',   // or custom domain
 
     // APK hosted on GitHub Releases (Netlify can't host big files)
-    apkUrl: 'https://github.com/YOUR_NAME/YOUR_REPO/releases/download/v1.0/app-release.apk',
+    apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
 
     // MUST match Flutter Android package name
     packageName: 'com.leaderboard.app',
@@ -65,7 +65,7 @@ class DeepLinkHandler {
         
         // Generate deep link URLs
         this.httpsLink = `https://${CONFIG.domain}/comp/${competitionId}`;
-        this.customSchemeLink = `competitionapp://open?comp=${competitionId}`;
+        this.customSchemeLink = `leaderboardapp://open?comp=${competitionId}`;
         
         // Get DOM elements
         this.openAppBtn = document.getElementById('openAppBtn');
