@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.yourcompany.competitionapp",
+    "sha256_cert_fingerprints": [
+      "c5:5c:a2:9c:20:0d:61:cb:26:cf:97:f3:49:ed:4d:52:d1:a3:78:bc:90:17:43:01:d5:b7:69:09:fe:eb:a1:06"
+    ]
+  }
+}]

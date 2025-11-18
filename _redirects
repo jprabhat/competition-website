@@ -1,0 +1,11 @@
+# Redirect all /comp/* paths to comp.html
+/comp/*  /comp.html  200
+
+# Handle APK downloads
+/downloads/*  /downloads/:splat  200
+
+# Ensure .well-known files are accessible
+/.well-known/*  /.well-known/:splat  200
+
+# 404 page (optional)
+/*  /index.html  404
