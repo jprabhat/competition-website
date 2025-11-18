@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 // ==================== CONFIGURATION ====================
 const CONFIG = {
-    domain: 'your-netlify-domain.netlify.app',   // or custom domain
+    domain: 'https://leaderboard-app123.netlify.app/',   // or custom domain
 
     // APK hosted on GitHub Releases (Netlify can't host big files)
     apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
