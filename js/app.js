@@ -1,17 +1,17 @@
 // ==================== CONFIGURATION ====================
+// ==================== CONFIGURATION ====================
 const CONFIG = {
-    // IMPORTANT: Replace this with your actual domain after deployment
-    domain: 'leaderboard.com',
-    
-    // APK download URL (will be auto-generated on Netlify)
-    apkUrl: '/downloads/app-release.apk',
-    
-    // App package name (must match your Flutter app)
-    packageName: 'com.yourcompany.competitionapp',
-    
-    // Deep link detection timeout (milliseconds)
+    domain: 'your-netlify-domain.netlify.app',   // or custom domain
+
+    // APK hosted on GitHub Releases (Netlify can't host big files)
+    apkUrl: 'https://github.com/YOUR_NAME/YOUR_REPO/releases/download/v1.0/app-release.apk',
+
+    // MUST match Flutter Android package name
+    packageName: 'com.leaderboard.app',
+
     deepLinkTimeout: 2500,
 };
+
 
 // ==================== UTILITIES ====================
 function getCompetitionId() {
