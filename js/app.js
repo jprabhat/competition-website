@@ -7,7 +7,7 @@ const CONFIG = {
     apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
 
     // MUST match Flutter Android package name
-    packageName: 'com.leaderboard.app',
+    packageName: 'com.leaderboard.leaderboard',
 
     deepLinkTimeout: 2500,
 };
