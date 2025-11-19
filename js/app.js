@@ -3,7 +3,7 @@ const CONFIG = {
     domain: 'leaderboard-app123.netlify.app',
     apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
     packageName: 'com.leaderboard.leaderboard',
-    deepLinkTimeout: 2000,
+    deepLinkTimeout: 2500,
 };
 
 // ==================== UTILITIES ====================
@@ -48,7 +48,8 @@ class DeepLinkHandler {
     constructor(competitionId) {
         this.competitionId = competitionId;
         this.appOpened = false;
-        this.attemptedOpen = false; // Prevent multiple attempts
+        this.attemptedOpen = false;
+        this.checkTimer = null;
 
         this.httpsLink = `https://${CONFIG.domain}/comp/${competitionId}`;
         this.customSchemeLink = `leaderboardapp://open?comp=${competitionId}`;
@@ -66,17 +67,27 @@ class DeepLinkHandler {
         this.openAppBtn?.addEventListener('click', () => this.attemptDeepLink());
         this.downloadAppBtn?.addEventListener('click', () => this.downloadApp());
 
-        // Listen for visibility changes
+        // Listen for page becoming hidden (app might have opened)
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && this.attemptedOpen) {
-                // User switched away - likely app opened
+            if (document.hidden && this.attemptedOpen && !this.appOpened) {
                 this.appOpened = true;
+                this.clearCheckTimer();
                 hideLoader();
                 showStatus('✅ App opened successfully!', 'success');
             }
         });
 
-        // Auto-attempt on mobile devices only once
+        // Listen for page blur (user switched away)
+        window.addEventListener('blur', () => {
+            if (this.attemptedOpen && !this.appOpened) {
+                this.appOpened = true;
+                this.clearCheckTimer();
+                hideLoader();
+                showStatus('✅ App opened successfully!', 'success');
+            }
+        });
+
+        // Auto-attempt on mobile devices
         if (this.isMobileDevice()) {
             setTimeout(() => this.attemptDeepLink(), 500);
         }
@@ -86,20 +97,27 @@ class DeepLinkHandler {
         return /Android/i.test(navigator.userAgent);
     }
 
+    clearCheckTimer() {
+        if (this.checkTimer) {
+            clearTimeout(this.checkTimer);
+            this.checkTimer = null;
+        }
+    }
+
     attemptDeepLink() {
         // Prevent multiple simultaneous attempts
-        if (this.attemptedOpen) {
+        if (this.attemptedOpen && !this.appOpened) {
             console.log('⚠️ Already attempting to open app');
             return;
         }
 
+        // Reset state for new attempt
         this.attemptedOpen = true;
         this.appOpened = false;
+        this.clearCheckTimer();
 
         showLoader();
         showStatus('🔄 Opening app...', 'info');
-
-        const startTime = Date.now();
 
         // Try HTTPS deep link first
         window.location.href = this.httpsLink;
@@ -111,18 +129,17 @@ class DeepLinkHandler {
             }
         }, 800);
 
-        // Check if app opened after timeout
-        setTimeout(() => {
-            const timeElapsed = Date.now() - startTime;
-            
-            // If page is still visible after timeout, app didn't open
-            if (!document.hidden && !this.appOpened) {
+        // Set timer to check if app opened
+        this.checkTimer = setTimeout(() => {
+            // If we're still here and page is focused, app didn't open
+            if (!this.appOpened && !document.hidden) {
                 this.showDownloadOption();
             }
         }, CONFIG.deepLinkTimeout);
     }
 
     showDownloadOption() {
+        this.clearCheckTimer();
         hideLoader();
         showStatus('⚠️ App not installed. Please download it first!', 'error');
         showElement(this.downloadAppBtn);
