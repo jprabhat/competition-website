@@ -68,13 +68,20 @@ class DeepLinkHandler {
         this.downloadAppBtn?.addEventListener('click', () => this.downloadApp());
 
         // Detect if app opens (browser becomes hidden)
+        this.startTime = Date.now();
+
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
+            // Chrome hides tab briefly even if app is NOT installed
+            const elapsed = Date.now() - this.startTime;
+
+            if (document.hidden && elapsed > 1500) {
+                // Hidden after 1.5s = user actually switched to the app
                 this.appOpened = true;
                 hideLoader();
                 showStatus('✅ App opened successfully!', 'success');
             }
         });
+
 
         if (this.isMobileDevice()) {
             setTimeout(() => this.attemptDeepLink(), 400);
@@ -100,7 +107,12 @@ class DeepLinkHandler {
         }, 900);
 
         // 3. Final check
-        setTimeout(() => this.checkIfAppOpened(), CONFIG.deepLinkTimeout);
+        setTimeout(() => {
+            if (!this.appOpened) {
+                this.showDownloadOption();
+            }
+        }, CONFIG.deepLinkTimeout + 1000);
+
     }
 
     checkIfAppOpened() {
