@@ -10,53 +10,56 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🏆</div>
-        <h1>Competition Registration</h1>
-        <p class="subtitle">Join this exciting competition!</p>
-        
-        <div class="competition-info">
-            <div class="info-row">
-                <span class="label">Competition ID:</span>
-                <span class="value" id="competitionIdDisplay">Loading...</span>
+
+    <div class="home-container">
+        <div class="hero">
+
+            <div class="logo-large">🏆</div>
+            <h1>Competition Registration</h1>
+            <p class="tagline">Join this exciting competition!</p>
+
+            <div class="competition-info">
+                <div class="info-row">
+                    <span class="label">Competition ID:</span>
+                    <span class="value" id="competitionIdDisplay">Loading...</span>
+                </div>
             </div>
-        </div>
 
-        <div id="content">
-            <button class="btn btn-primary" id="openAppBtn">
-                <span class="btn-icon">📱</span>
-                <span>Open in App</span>
-                <span class="btn-arrow">→</span>
-            </button>
-            
-            <button class="btn btn-secondary hidden" id="downloadAppBtn">
-                <span class="btn-icon">⬇️</span>
-                <span>Download App First</span>
-            </button>
+            <div id="content">
+                <button class="btn btn-primary" id="openAppBtn">
+                    <span class="btn-icon">📱</span>
+                    <span>Open in App</span>
+                    <span class="btn-arrow">→</span>
+                </button>
 
-            <div id="status" class="status hidden"></div>
-            <div class="loader hidden" id="loader"></div>
+                <button class="btn btn-secondary hidden" id="downloadAppBtn">
+                    <span class="btn-icon">⬇️</span>
+                    <span>Download App First</span>
+                </button>
 
-            <div class="help-section">
-                <details>
-                    <summary>Need help?</summary>
-                    <div class="help-content">
-                        <p><strong>If the app doesn't open:</strong></p>
-                        <ol>
-                            <li>Click "Download App First" button</li>
-                            <li>Install the downloaded APK</li>
-                            <li>Scan the QR code again</li>
-                            <li>The app will open automatically</li>
-                        </ol>
-                        <p class="note">💡 Make sure to enable "Install from Unknown Sources" in your Android settings if prompted.</p>
-                    </div>
-                </details>
+                <div id="status" class="status hidden"></div>
+                <div class="loader hidden" id="loader"></div>
+
+                <div class="help-section">
+                    <details>
+                        <summary>Need help?</summary>
+                        <div class="help-content">
+                            <p><strong>If the app doesn't open:</strong></p>
+                            <ol>
+                                <li>Click "Download App First"</li>
+                                <li>Install the APK</li>
+                                <li>Scan QR again</li>
+                            </ol>
+                        </div>
+                    </details>
+                </div>
             </div>
         </div>
 
         <footer class="page-footer">
             <a href="/" class="back-link">← Back to Home</a>
         </footer>
+
     </div>
 
     <script src="/js/app.js"></script>
