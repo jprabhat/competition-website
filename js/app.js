@@ -1,9 +1,9 @@
 // ==================== CONFIGURATION ====================
 const CONFIG = {
-    domain: 'leaderboard-app123.netlify.app',  // correct domain (no https://)
+    domain: 'leaderboard-app123.netlify.app',
     apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
     packageName: 'com.leaderboard.leaderboard',
-    deepLinkTimeout: 2500,
+    deepLinkTimeout: 2000,
 };
 
 // ==================== UTILITIES ====================
@@ -48,11 +48,10 @@ class DeepLinkHandler {
     constructor(competitionId) {
         this.competitionId = competitionId;
         this.appOpened = false;
+        this.attemptedOpen = false; // Prevent multiple attempts
 
-        // Correct deep link URLs
         this.httpsLink = `https://${CONFIG.domain}/comp/${competitionId}`;
         this.customSchemeLink = `leaderboardapp://open?comp=${competitionId}`;
-
 
         this.openAppBtn = document.getElementById('openAppBtn');
         this.downloadAppBtn = document.getElementById('downloadAppBtn');
@@ -67,24 +66,19 @@ class DeepLinkHandler {
         this.openAppBtn?.addEventListener('click', () => this.attemptDeepLink());
         this.downloadAppBtn?.addEventListener('click', () => this.downloadApp());
 
-        // Detect if app opens (browser becomes hidden)
-        this.startTime = Date.now();
-
+        // Listen for visibility changes
         document.addEventListener('visibilitychange', () => {
-            // Chrome hides tab briefly even if app is NOT installed
-            const elapsed = Date.now() - this.startTime;
-
-            if (document.hidden && elapsed > 1500) {
-                // Hidden after 1.5s = user actually switched to the app
+            if (document.hidden && this.attemptedOpen) {
+                // User switched away - likely app opened
                 this.appOpened = true;
                 hideLoader();
                 showStatus('✅ App opened successfully!', 'success');
             }
         });
 
-
+        // Auto-attempt on mobile devices only once
         if (this.isMobileDevice()) {
-            setTimeout(() => this.attemptDeepLink(), 400);
+            setTimeout(() => this.attemptDeepLink(), 500);
         }
     }
 
@@ -93,41 +87,48 @@ class DeepLinkHandler {
     }
 
     attemptDeepLink() {
+        // Prevent multiple simultaneous attempts
+        if (this.attemptedOpen) {
+            console.log('⚠️ Already attempting to open app');
+            return;
+        }
+
+        this.attemptedOpen = true;
+        this.appOpened = false;
+
         showLoader();
         showStatus('🔄 Opening app...', 'info');
 
-        // 1. Try verified HTTPS link
+        const startTime = Date.now();
+
+        // Try HTTPS deep link first
         window.location.href = this.httpsLink;
 
-        // 2. Fallback to custom scheme if not opened
+        // Fallback to custom scheme after short delay
         setTimeout(() => {
             if (!this.appOpened) {
                 window.location.href = this.customSchemeLink;
             }
-        }, 900);
+        }, 800);
 
-        // 3. Final check
+        // Check if app opened after timeout
         setTimeout(() => {
-            if (!this.appOpened) {
+            const timeElapsed = Date.now() - startTime;
+            
+            // If page is still visible after timeout, app didn't open
+            if (!document.hidden && !this.appOpened) {
                 this.showDownloadOption();
             }
-        }, CONFIG.deepLinkTimeout + 1000);
-
-    }
-
-    checkIfAppOpened() {
-        if (document.hidden || this.appOpened) {
-            showStatus('✅ App opened successfully!', 'success');
-            hideLoader();
-        } else {
-            this.showDownloadOption();
-        }
+        }, CONFIG.deepLinkTimeout);
     }
 
     showDownloadOption() {
         hideLoader();
         showStatus('⚠️ App not installed. Please download it first!', 'error');
         showElement(this.downloadAppBtn);
+
+        // Reset flag to allow retry
+        this.attemptedOpen = false;
 
         if (this.openAppBtn) {
             this.openAppBtn.innerHTML = `
@@ -139,7 +140,7 @@ class DeepLinkHandler {
 
     downloadApp() {
         window.location.href = CONFIG.apkUrl;
-        showStatus('📥 Downloading app... Install and reopen!', 'success');
+        showStatus('📥 Downloading app... Install and reopen this page!', 'success');
     }
 }
 
