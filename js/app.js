@@ -51,7 +51,8 @@ class DeepLinkHandler {
 
         // Correct deep link URLs
         this.httpsLink = `https://${CONFIG.domain}/comp/${competitionId}`;
-        this.customSchemeLink = `leaderboardapp://competition?id=${competitionId}`;
+        this.customSchemeLink = `leaderboardapp://open?comp=${competitionId}`;
+
 
         this.openAppBtn = document.getElementById('openAppBtn');
         this.downloadAppBtn = document.getElementById('downloadAppBtn');
