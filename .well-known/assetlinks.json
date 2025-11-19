@@ -1,12 +1,10 @@
-[
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.leaderboard.leaderboard",
-      "sha256_cert_fingerprints": [
-        "c5:5c:a2:9c:20:0d:61:cb:26:cf:97:f3:49:ed:4d:52:d1:a3:78:bc:90:17:43:01:d5:b7:69:09:fe:eb:a1:06"
-      ]
-    }
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.leaderboard.leaderboard",
+    "sha256_cert_fingerprints": [
+      "C3:CA:3C:EC:DC:9B:66:58:32:76:69:E9:35:EE:DB:F9:3A:09:FD:45:2F:2F:CA:E8:04:78:F5:BD:19:43:8D:60"
+    ]
   }
-]
+}]
