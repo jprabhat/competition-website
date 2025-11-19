@@ -222,12 +222,24 @@ function hideLoader() {
     hideElement(document.getElementById('loader'));
 }
 
+// Debug logger visible on page
+function debugLog(msg) {
+    console.log(msg);
+    const debugDiv = document.getElementById('debugInfo');
+    if (debugDiv) {
+        const time = new Date().toLocaleTimeString();
+        debugDiv.innerHTML += `<div>[${time}] ${msg}</div>`;
+        debugDiv.scrollTop = debugDiv.scrollHeight;
+    }
+}
+
 // ==================== DEEP LINK HANDLER ====================
 class DeepLinkHandler {
     constructor(competitionId) {
         this.competitionId = competitionId;
         this.appOpened = false;
         this.attemptInProgress = false;
+        this.startTime = null;
 
         this.httpsLink = `https://${CONFIG.domain}/comp/${competitionId}`;
         this.customSchemeLink = `leaderboardapp://open?comp=${competitionId}`;
@@ -235,7 +247,35 @@ class DeepLinkHandler {
         this.openAppBtn = document.getElementById('openAppBtn');
         this.downloadAppBtn = document.getElementById('downloadAppBtn');
 
+        // Add debug div
+        this.addDebugDiv();
         this.init();
+    }
+
+    addDebugDiv() {
+        const debugDiv = document.createElement('div');
+        debugDiv.id = 'debugInfo';
+        debugDiv.style.cssText = `
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 10px;
+            z-index: 9999;
+            display: none;
+        `;
+        document.body.appendChild(debugDiv);
+        
+        // Show debug on mobile
+        if (this.isMobileDevice()) {
+            debugDiv.style.display = 'block';
+        }
     }
 
     init() {
@@ -245,8 +285,12 @@ class DeepLinkHandler {
         this.openAppBtn?.addEventListener('click', () => this.attemptDeepLink());
         this.downloadAppBtn?.addEventListener('click', () => this.downloadApp());
 
+        debugLog('🚀 Handler initialized');
+        debugLog(`Mobile device: ${this.isMobileDevice()}`);
+
         // Auto-attempt on mobile devices
         if (this.isMobileDevice()) {
+            debugLog('Auto-attempting in 500ms...');
             setTimeout(() => this.attemptDeepLink(), 500);
         }
     }
@@ -257,89 +301,79 @@ class DeepLinkHandler {
 
     attemptDeepLink() {
         if (this.attemptInProgress) {
-            console.log('⚠️ Attempt already in progress');
+            debugLog('❌ Attempt already in progress');
             return;
         }
 
+        debugLog('▶️ Starting deep link attempt');
         this.attemptInProgress = true;
         this.appOpened = false;
+        this.startTime = Date.now();
 
         showLoader();
         showStatus('🔄 Opening app...', 'info');
 
-        const startTime = Date.now();
-        let checkInterval;
-        let finalTimeout;
-
-        // Monitor if user leaves the page (app opened)
+        // Setup visibility detection
         const visibilityHandler = () => {
             if (document.hidden) {
-                this.appOpened = true;
-                clearInterval(checkInterval);
-                clearTimeout(finalTimeout);
+                debugLog('✅ Page hidden - app opened!');
+                this.handleAppOpened();
                 document.removeEventListener('visibilitychange', visibilityHandler);
-                hideLoader();
-                showStatus('✅ App opened successfully!', 'success');
+                window.removeEventListener('blur', blurHandler);
             }
         };
 
         const blurHandler = () => {
-            // Give it a moment to see if visibility also changes
+            debugLog('👁️ Window blurred');
             setTimeout(() => {
-                if (!this.appOpened) {
-                    this.appOpened = true;
-                    clearInterval(checkInterval);
-                    clearTimeout(finalTimeout);
-                    window.removeEventListener('blur', blurHandler);
+                if (!this.appOpened && document.hidden) {
+                    debugLog('✅ Blur + hidden - app opened!');
+                    this.handleAppOpened();
                     document.removeEventListener('visibilitychange', visibilityHandler);
-                    hideLoader();
-                    showStatus('✅ App opened successfully!', 'success');
+                    window.removeEventListener('blur', blurHandler);
                 }
-            }, 100);
+            }, 200);
         };
 
         document.addEventListener('visibilitychange', visibilityHandler);
         window.addEventListener('blur', blurHandler);
 
-        // Try opening the app with custom scheme (less disruptive)
-        try {
-            window.location.href = this.customSchemeLink;
-        } catch (e) {
-            console.log('Custom scheme failed:', e);
-        }
+        // Try custom scheme
+        debugLog(`🔗 Trying custom scheme: ${this.customSchemeLink}`);
+        window.location.href = this.customSchemeLink;
 
-        // Fallback to HTTPS link after a brief moment
+        // Try HTTPS fallback
         setTimeout(() => {
             if (!this.appOpened) {
-                try {
-                    window.location.href = this.httpsLink;
-                } catch (e) {
-                    console.log('HTTPS link failed:', e);
-                }
+                debugLog(`🔗 Trying HTTPS: ${this.httpsLink}`);
+                window.location.href = this.httpsLink;
             }
-        }, 500);
+        }, 600);
 
-        // Continuously check if we're still on the page
-        checkInterval = setInterval(() => {
-            if (this.appOpened) {
-                clearInterval(checkInterval);
-            }
-        }, 100);
-
-        // Final timeout - if still here, app didn't open
-        finalTimeout = setTimeout(() => {
-            clearInterval(checkInterval);
+        // Final timeout check
+        setTimeout(() => {
+            const elapsed = Date.now() - this.startTime;
+            debugLog(`⏱️ Timeout reached after ${elapsed}ms`);
+            debugLog(`Hidden: ${document.hidden}, AppOpened: ${this.appOpened}`);
+            
             document.removeEventListener('visibilitychange', visibilityHandler);
             window.removeEventListener('blur', blurHandler);
 
             if (!this.appOpened) {
-                console.log('App did not open after timeout');
+                debugLog('⚠️ Showing download option');
                 this.showDownloadOption();
             }
         }, CONFIG.deepLinkTimeout);
     }
 
+    handleAppOpened() {
+        this.appOpened = true;
+        hideLoader();
+        showStatus('✅ App opened successfully!', 'success');
+    }
+
     showDownloadOption() {
+        debugLog('📥 Displaying download button');
         hideLoader();
         showStatus('⚠️ App not installed. Please download it first!', 'error');
         showElement(this.downloadAppBtn);
@@ -355,6 +389,7 @@ class DeepLinkHandler {
     }
 
     downloadApp() {
+        debugLog('⬇️ Starting download');
         window.location.href = CONFIG.apkUrl;
         showStatus('📥 Downloading app... Install and reopen this page!', 'success');
     }
@@ -365,7 +400,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname.includes('/comp')) {
         const id = getCompetitionId();
         new DeepLinkHandler(id);
-        console.log(`🚀 Deep Link Handler initialized for: ${id}`);
     }
 });
 
