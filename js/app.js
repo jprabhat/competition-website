@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 const CONFIG = {
     domain: 'leaderboard-app123.netlify.app',
-    apkUrl: 'https://github.com/jprabhat/competition-website/releases/download/v1.0.0/app-release.apk',
+    apkUrl: 'https://github.com/jprabhat/competition-website/releases/latest/download/app-release.apk',
     packageName: 'com.leaderboard.leaderboard',
     deepLinkTimeout: 2500,
 };
